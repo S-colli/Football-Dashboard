@@ -1,10 +1,16 @@
+# Importing libraries
+
 import pandas as pd
+
+# Reading files
 
 appearances = pd.read_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\inputs\appearances.csv')
 games = pd.read_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\inputs\games.csv')
 players = pd.read_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\inputs\players.csv')
 clubs = pd.read_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\inputs\clubs.csv')
 club_games = pd.read_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\inputs\club_games.csv')
+
+# EDA for appearance data
 
 print(appearances.info())
 
@@ -13,6 +19,8 @@ print(appearances.nunique())
 print(appearances.describe().apply(lambda s: s.apply('{0:.5f}'.format)))
 
 appearances_df = appearances[appearances['player_current_club_id'] != -1]
+
+# EDA for games data
 
 print(games.info())
 
@@ -28,6 +36,8 @@ games_df = games.drop(columns = ['home_club_manager_name',
                                  'competition_type'])
 print(games_df.head())
 
+# Selecting European top flight leagues
+
 unique_competition_ids = appearances['competition_id'].unique()
 print(unique_competition_ids)
 
@@ -35,12 +45,18 @@ desired_competition_ids = ['ES1', 'FR1', 'IT1', 'NL1', 'PO1', 'GB1', 'L1']
 appearances_df = appearances_df[appearances_df['competition_id'].isin(desired_competition_ids)]
 games_df = games_df[games_df['competition_id'].isin(desired_competition_ids)]
 
+# Appending goal contributions column
+
 appearances_df['goal_contributions'] = appearances_df['goals'] + appearances_df['assists']
 print(appearances_df.head())
+
+# Converting season column to string
 
 games_df['season'] = games_df['season'].astype(str)
 games_df['season'] = games_df['season'] + '-' + (games_df['season'].astype(int) + 1).astype(str)
 print(games_df.head())
+
+# Creating home games dataframe
 
 home_games_df = games_df[['game_id',
                           'competition_id',
@@ -69,6 +85,8 @@ home_games_df['at_home'] = True
 
 print(home_games_df.head())
 
+# Creating away game dataframe
+
 away_games_df = games_df[['game_id',
                           'competition_id',
                           'season',
@@ -96,6 +114,8 @@ away_games_df['at_home'] = False
 
 print(away_games_df.head())
 
+# Combining home and away game dataframes
+
 games_long_df = pd.concat([home_games_df, away_games_df], ignore_index = True)
 
 unique_rounds = games_long_df['round'].unique()
@@ -111,6 +131,8 @@ games_long_df = games_long_df.sort_values(by = 'game_id').reset_index(drop = Tru
 
 print(games_long_df.info())
 
+# Manipulating player data for ease of use
+
 players_df = players[['player_id',
                       'country_of_citizenship',
                       'date_of_birth',
@@ -124,6 +146,8 @@ players_df = players[['player_id',
 players_df.rename(columns = {'country_of_citizenship' : 'nationality'}, inplace = True)
 
 print(players_df.head())
+
+# Writing data to new files 
 
 appearances_df.to_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\outputs\appearances_df.csv', index = False)
 games_long_df.to_csv(r'C:\Users\samue\Documents\00 Coding\Football Project\outputs\games_long_df.csv', index = False)
